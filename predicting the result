@@ -1,0 +1,38 @@
+# Load the dataset
+df = pd.read_csv(csv_file_path)
+
+# Define 'pass' or 'fail' based on the average score
+df['average_score'] = df[['math score', 'reading score', 'writing score']].mean(axis=1)
+df['result'] = df['average_score'].apply(lambda x: 'pass' if x >= 50 else 'fail')
+
+# Prepare the features (only include score columns)
+X = df[['math score', 'reading score', 'writing score']]
+y = df['result']
+
+# Scale the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Split the dataset into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Build the SVM classifier model
+svm_classifier = SVC(kernel='linear')  # You can try 'rbf', 'poly', etc.
+svm_classifier.fit(X_train, y_train)
+
+# Predict the pass/fail results for the test set
+y_pred = svm_classifier.predict(X_test)
+
+# Example: Predict for a new hypothetical student based on scores
+new_student = pd.DataFrame({
+    'math score': [70],  # New score
+    'reading score': [80],  # New score
+    'writing score': [75]  # New score
+})
+
+# Scale the new student's scores
+new_student_scaled = scaler.transform(new_student)
+
+# Predict pass/fail for the new student based on scores
+new_student_result = svm_classifier.predict(new_student_scaled)
+print(f"Predicted result for the new student: {new_student_result[0]}")
